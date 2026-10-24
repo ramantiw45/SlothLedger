@@ -45,9 +45,7 @@ Python 3.11+, standard library, no pip install. With no `.env` the app uses the
 rules floor for judgement and a local SQLite file for storage — it runs on a
 plane, in a cabin, or with the Wi-Fi off. Add keys to switch the lanes on.
 
-## Deploy it
-
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/ramantiw45/SlothLedger)
+## Deploy your own
 
 `render.yaml` is a working Render blueprint: free plan, Python 3.12, health
 check on `/healthz`, one dependency (`pg8000`), and two secrets (`DATABASE_URL`,
