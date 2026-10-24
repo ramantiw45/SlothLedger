@@ -1,0 +1,2 @@
+# Only the Postgres lane needs a dependency. Everything else is stdlib.
+pg8000==1.31.5

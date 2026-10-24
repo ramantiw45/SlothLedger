@@ -8,6 +8,9 @@ No dependencies. Standard library only, on purpose.
 from __future__ import annotations
 
 import json
+import os
+import threading
+import time
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -19,6 +22,27 @@ from sloth.db import open_store
 ROOT = Path(__file__).resolve().parent
 STATIC = ROOT / "static"
 PORT = int(config.setting("PORT", "8787") or 8787)
+HOST = config.setting("HOST", "127.0.0.1") or "127.0.0.1"
+
+# A public deployment shares one ledger, so writes are rate-limited per visitor.
+# Local use is untouched: DEMO_MODE is off unless the environment says otherwise.
+DEMO = os.environ.get("DEMO_MODE") == "1"
+DEMO_WRITE_LIMIT = 8
+DEMO_WINDOW_SECONDS = 600
+_WRITES: dict[str, list[float]] = {}
+_WRITES_LOCK = threading.Lock()
+
+
+def _demo_rate_limited(ip: str) -> bool:
+    now = time.monotonic()
+    with _WRITES_LOCK:
+        hits = [t for t in _WRITES.get(ip, []) if now - t < DEMO_WINDOW_SECONDS]
+        if len(hits) >= DEMO_WRITE_LIMIT:
+            _WRITES[ip] = hits
+            return True
+        hits.append(now)
+        _WRITES[ip] = hits
+        return False
 
 CONTENT_TYPES = {
     ".html": "text/html; charset=utf-8",
@@ -45,7 +69,11 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Cache-Control", "no-store" if "json" in content_type else "max-age=60")
         self.end_headers()
         if self.command != "HEAD":
-            self.wfile.write(body)
+            try:
+                self.wfile.write(body)
+            except (BrokenPipeError, ConnectionAbortedError, ConnectionResetError):
+                # The visitor closed the tab mid-response; not an app error.
+                pass
 
     def _json(self, status: int, payload: dict) -> None:
         self._send(status, json.dumps(payload).encode("utf-8"), "application/json; charset=utf-8")
@@ -65,9 +93,11 @@ class Handler(BaseHTTPRequestHandler):
     def _snapshot(self) -> dict:
         store = self._store()
         try:
-            return ledger.snapshot(store)
+            data = ledger.snapshot(store)
         finally:
             store.close()
+        data["demo"] = DEMO
+        return data
 
     # -- routes ----------------------------------------------------------
     def do_GET(self) -> None:  # noqa: N802
@@ -85,6 +115,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._json(200, self._snapshot())
         if path.startswith("/static/"):
             return self._static(path.removeprefix("/static/"))
+        if path == "/favicon.ico":
+            return self._send(204, b"", "image/x-icon")
         self._json(404, {"error": "not found"})
 
     def do_HEAD(self) -> None:  # noqa: N802
@@ -92,6 +124,11 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self) -> None:  # noqa: N802
         path = urlparse(self.path).path
+        if DEMO and _demo_rate_limited(self.client_address[0]):
+            return self._json(
+                429,
+                {"error": "the public demo allows a few writes per visitor; clone the repo to keep your own ledger"},
+            )
         try:
             payload = self._body()
         except ValueError as exc:
@@ -145,8 +182,8 @@ def main() -> None:
     store = open_store()
     lane = getattr(store, "lane", "unknown")
     store.close()
-    print(f"Sloth Ledger on http://127.0.0.1:{PORT}  (store: {lane})")
-    ThreadingHTTPServer(("127.0.0.1", PORT), Handler).serve_forever()
+    print(f"Sloth Ledger on http://{HOST}:{PORT}  (store: {lane}, demo: {DEMO})")
+    ThreadingHTTPServer((HOST, PORT), Handler).serve_forever()
 
 
 if __name__ == "__main__":

@@ -1,0 +1,31 @@
+# Render Blueprint — free tier, Tiger Cloud for storage.
+# Deploy: New + > Blueprint > point at this repo. Secrets are prompted, never
+# committed: DATABASE_URL (Tiger) and MODEL_API_KEY (Groq).
+services:
+  - type: web
+    name: sloth-ledger
+    runtime: python
+    plan: free
+    region: singapore
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py
+    healthCheckPath: /healthz
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.6"
+      # Render routes traffic to 0.0.0.0; the app binds localhost by default.
+      - key: HOST
+        value: 0.0.0.0
+      # Shared public ledger: rate-limit writes and label the page as a demo.
+      - key: DEMO_MODE
+        value: "1"
+      - key: MODEL_BASE_URL
+        value: https://api.groq.com/openai/v1
+      - key: MODEL_NAME
+        value: qwen/qwen3.8-27b
+      # Set these in the Render dashboard when the blueprint asks for them.
+      - key: MODEL_API_KEY
+        sync: false
+      # postgresql://sloth_app:...@HOST:PORT/tsdb?sslmode=require
+      - key: DATABASE_URL
+        sync: false

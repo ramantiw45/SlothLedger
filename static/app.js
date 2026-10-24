@@ -31,10 +31,11 @@
 
   function renderMeta(snapshot) {
     const model = snapshot.lanes.find((lane) => lane !== "rules") || "rules floor";
+    const demo = snapshot.demo ? `<span data-meta="demo">public demo · shared ledger</span>` : "";
     el("meta").innerHTML = `
       <span data-meta="store">store · ${esc(snapshot.store_lane)}</span>
       <span data-meta="model">judgement · ${esc(model)}</span>
-      <span data-meta="date">${esc(new Date().toLocaleDateString("en-GB", { weekday: "short", day: "2-digit", month: "short", year: "numeric" }))}</span>`;
+      <span data-meta="date">${esc(new Date().toLocaleDateString("en-GB", { weekday: "short", day: "2-digit", month: "short", year: "numeric" }))}</span>${demo}`;
     el("foot-model").textContent = model;
     el("foot-store").textContent = snapshot.store_lane;
   }
