@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sloth Ledger — the receipt for your time</title>
+<meta name="description" content="A local-first ledger of the minutes you get back. An open-weight model gives the verdict, a time-series database does the arithmetic.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%2314201b'/><rect x='6' y='7' width='20' height='18' fill='%23e7dcbe'/><circle cx='10' cy='11' r='1.6' fill='%2314201b'/></svg>">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<a class="skip" href="#new-entry">Skip to the entry card</a>
+
+<header class="desk-head">
+  <p class="wordmark">Sloth&nbsp;Ledger</p>
+  <p class="meta" id="meta">
+    <span data-meta="store">store · —</span>
+    <span data-meta="model">judgement · —</span>
+    <span data-meta="date">—</span>
+  </p>
+</header>
+
+<main class="desk">
+  <section class="top" aria-labelledby="totals-title">
+    <div class="card totals" aria-labelledby="totals-title">
+      <span class="punch" aria-hidden="true"></span>
+      <h1 class="card-title" id="totals-title">Reclaimed this week</h1>
+      <p class="big" id="week">0m</p>
+      <p class="sub" id="week-sub">no automation has run yet</p>
+      <dl class="ledger-lines">
+        <div><dt>All time</dt><dd id="all">0m</dd></div>
+        <div><dt>Still on you</dt><dd id="manual">0m</dd></div>
+        <div><dt>Chores judged</dt><dd id="count">0</dd></div>
+      </dl>
+      <p class="tally-note" id="tally-note">Fourteen days, one punch per day with time booked.</p>
+      <div class="tally" id="tally" role="img" aria-label="Days with reclaimed time in the last fourteen days"></div>
+    </div>
+
+    <div class="card entry" id="new-entry">
+      <h2 class="card-title">New entry</h2>
+      <p class="card-note">Type it the way you would say it out loud. The model judges; the ledger counts.</p>
+      <form id="chore-form" autocomplete="off">
+        <label class="typed-label" for="description">The chore</label>
+        <textarea id="description" name="description" rows="2" required minlength="3"
+          placeholder="renamed 40 receipts from the shoebox"></textarea>
+
+        <div class="entry-row">
+          <div class="field">
+            <label class="typed-label" for="minutes">Minutes it took <span>(optional — your number wins)</span></label>
+            <input id="minutes" name="minutes" type="number" min="1" max="480" inputmode="numeric" placeholder="25">
+          </div>
+          <button type="submit" class="stamp-btn solid" id="submit">Stamp it</button>
+        </div>
+        <p class="error" id="error" role="alert" hidden></p>
+      </form>
+    </div>
+  </section>
+
+  <p class="payoff" id="payoff" aria-live="polite">Reading the tray…</p>
+
+  <section class="tray-section" aria-labelledby="tray-title">
+    <div class="tray-head">
+      <h2 class="tray-title" id="tray-title">The tray</h2>
+      <p class="tray-count" id="tray-count"></p>
+    </div>
+    <ul class="tray" id="chores"></ul>
+    <p class="blank-card" id="empty">Empty tray. The first card is usually the chore you keep postponing.</p>
+  </section>
+</main>
+
+<footer class="desk-foot">
+  <p><span id="foot-model">rules</span> for judgement · <span id="foot-store">sqlite</span> for arithmetic · <a href="/healthz">health</a></p>
+  <p class="fine">Hacktoberfest Open-Source AI Challenge, Week 3 · “Slow and Steady”. The model has an opinion; the ledger has the numbers.</p>
+</footer>
+
+<script src="/static/app.js" defer></script>
+</body>
+</html>
