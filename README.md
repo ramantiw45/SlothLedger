@@ -47,11 +47,15 @@ plane, in a cabin, or with the Wi-Fi off. Add keys to switch the lanes on.
 
 ## Deploy it
 
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/ramantiw45/SlothLedger)
+
 `render.yaml` is a working Render blueprint: free plan, Python 3.12, health
 check on `/healthz`, one dependency (`pg8000`), and two secrets (`DATABASE_URL`,
 `MODEL_API_KEY`) left as `sync: false` so they are pasted into the dashboard and
 never committed. Point Render at this repo, apply the blueprint, and it builds
-itself. Step-by-step notes are in `docs/deploy.md`.
+itself. Step-by-step notes are in `docs/deploy.md`; the service as it actually
+runs — region, plan, environment, verification transcript — is recorded in
+`docs/DEPLOYED.md`.
 
 The free instance sleeps after fifteen minutes of inactivity. That is survivable
 here because the reclaimed minutes live in Tiger Cloud, not on the instance's
