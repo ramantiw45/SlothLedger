@@ -96,6 +96,10 @@ corpus for a freelance designer — illustrative chores, not measurements of a
 real person's week. Replace them with your own before claiming any savings.
 Minutes booked in the screenshots come from those entries.
 
+The hosted demo is a shared ledger, so its totals move as visitors add chores and
+run automations. The screenshots and the figures in the DEV post are the snapshot
+taken at publication; the live counters are allowed to disagree with them.
+
 ## Tests
 
 ```bash
