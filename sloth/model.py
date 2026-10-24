@@ -255,7 +255,16 @@ def estimate(description: str, stated_minutes: int | None = None) -> dict:
         try:
             model = _normalise(lane(description, stated_minutes), floor)
             break
-        except (urllib.error.URLError, TimeoutError, OSError, ValueError, KeyError, RuntimeError):
+        except urllib.error.HTTPError as exc:
+            detail = ""
+            try:
+                detail = exc.read().decode("utf-8", "replace")[:200]
+            except Exception:  # noqa: BLE001 - diagnostics must never raise
+                detail = ""
+            print(f"[lane] {lane.__name__} HTTP {exc.code}: {detail}", flush=True)
+            continue
+        except (urllib.error.URLError, TimeoutError, OSError, ValueError, KeyError, RuntimeError) as exc:
+            print(f"[lane] {lane.__name__} unavailable: {type(exc).__name__}: {exc}", flush=True)
             continue
 
     chosen = model or floor
